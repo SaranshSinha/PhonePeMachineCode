@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class DaoTest {
     @Test
     public void testSaveAndRetrieveIssue() {
-        IssueDao issueDAO = new IssueDao();
+        IssueDao issueDAO = IssueDao.getInstance();
         Issue issue = new Issue("ISSUE-1", IssueType.PAYMENT, "Payment Issue", "Details", "user1@example.com");
 
         issueDAO.saveIssue(issue);

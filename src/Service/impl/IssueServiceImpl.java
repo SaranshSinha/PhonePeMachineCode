@@ -22,8 +22,8 @@ public class IssueServiceImpl implements IssueServiceInterface {
     private final AtomicInteger issueCounter = new AtomicInteger(0);
 
     public IssueServiceImpl(AssignmentStrategy assignmentStrategy) {
-        this.agentDAO = new AgentDao();
-        this.issueDAO = new IssueDao();
+        this.agentDAO = AgentDao.getInstance();
+        this.issueDAO = IssueDao.getInstance();
         this.assignmentStrategy = assignmentStrategy;
     }
 

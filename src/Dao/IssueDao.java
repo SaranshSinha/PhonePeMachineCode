@@ -7,6 +7,19 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class IssueDao {
     private final Map<String, Issue> issueStorage = new ConcurrentHashMap<>();
+    private static IssueDao instance;
+
+    private IssueDao() {
+
+    }
+
+    public static IssueDao getInstance() {
+        if (instance == null) {
+            instance = new IssueDao();
+            return instance;
+        }
+        return instance;
+    }
 
     public void saveIssue(Issue issue) {
         issueStorage.put(issue.getId(), issue);
