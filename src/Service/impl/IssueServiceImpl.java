@@ -1,5 +1,7 @@
 package Service.impl;
 
+import Dao.AgentDao;
+import Dao.IssueDao;
 import exception.InvalidInputException;
 import model.Agent;
 import model.Issue;
@@ -13,12 +15,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class IssueServiceImpl implements IssueServiceInterface {
-    private final Map<String, Issue> issues = new ConcurrentHashMap<>();
+    private final IssueDao issueDAO;
+    private final AgentDao agentDAO;
     private final Map<String, List<Issue>> agentWorkHistory = new ConcurrentHashMap<>();
     private final AssignmentStrategy assignmentStrategy;
     private final AtomicInteger issueCounter = new AtomicInteger(0);
 
     public IssueServiceImpl(AssignmentStrategy assignmentStrategy) {
+        this.agentDAO = new AgentDao();
+        this.issueDAO = new IssueDao();
         this.assignmentStrategy = assignmentStrategy;
     }
 
@@ -30,13 +35,13 @@ public class IssueServiceImpl implements IssueServiceInterface {
 
         String issueId = "ISSUE-" + issueCounter.incrementAndGet();
         Issue issue = new Issue(issueId, type, subject, description, email);
-        issues.put(issueId, issue);
+        issueDAO.saveIssue(issue);
         return issueId;
     }
 
     @Override
     public void assignIssue(String issueId, List<Agent> agents) throws InvalidInputException {
-        Issue issue = issues.get(issueId);
+        Issue issue = issueDAO.getIssueById(issueId);
         if (issue == null) {
             throw new InvalidInputException("Issue not found with ID: " + issueId);
         }
@@ -57,6 +62,7 @@ public class IssueServiceImpl implements IssueServiceInterface {
         agentWorkHistory.get(assignedAgent.getId()).add(issue);
 
         assignedAgent.setAvailable(false);
+        issueDAO.saveIssue(issue);
     }
 
     @Override
@@ -68,7 +74,7 @@ public class IssueServiceImpl implements IssueServiceInterface {
             throw new InvalidInputException("Status cannot be null or blank.");
         }
 
-        Issue issue = issues.get(issueId);
+        Issue issue = issueDAO.getIssueById(issueId);
         if (issue == null) {
             throw new InvalidInputException("No issue found with ID: " + issueId);
         }
@@ -105,7 +111,7 @@ public class IssueServiceImpl implements IssueServiceInterface {
             throw new InvalidInputException("Resolution cannot be null or blank.");
         }
 
-        Issue issue = issues.get(issueId);
+        Issue issue = issueDAO.getIssueById(issueId);
         if (issue == null) {
             throw new InvalidInputException("No issue found with ID: " + issueId);
         }
@@ -139,7 +145,7 @@ public class IssueServiceImpl implements IssueServiceInterface {
             throw new InvalidInputException("Email cannot be null or blank.");
         }
 
-        return issues.values().stream()
+        return issueDAO.getAllIssues().values().stream()
                 .filter(issue -> email.equals(issue.getEmail()))
                 .collect(Collectors.toList());
     }
